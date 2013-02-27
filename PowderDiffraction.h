@@ -71,7 +71,7 @@ class PowderDiffraction
 public:
     PowderDiffraction( float LatticeConst, boost::variate_generator<base_generator_type&, boost::uniform_real<> > *Generator )
     {
-        this->a0 = a0;
+        this->a0 = LatticeConst;
         this->uni = Generator;
     }
 
@@ -104,7 +104,7 @@ public:
             PlaneNames.push_back( s );
         }
 
-        PlaneNames.erase( PlaneNames.end() ); //last column is "Sum"
+        PlaneNames.erase( --PlaneNames.end() ); //last column is "Sum"
 
         std::vector< float > LatticeSpacings;
 
@@ -165,7 +165,7 @@ public:
 
         DeltaE = (MaxE-MinE)/float(DiffDataLines.size()-1);
 
-        NumLatticePlanes = DiffDataLines[0].BraggAngles.size();
+        NumLatticePlanes = int(DiffDataLines[0].BraggAngles.size());
 
         cout << "MinE: " << MinE << "\tMaxE: " << MaxE << "\tDeltaE: " << DeltaE << endl;
     }
