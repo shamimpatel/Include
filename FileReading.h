@@ -92,6 +92,12 @@ void DoubleFromString(std::string S, double &x)
     x = atof(S.c_str());
 }
 
+void IntFromString(std::string S, int &x)
+{
+    x = atoi(S.c_str());
+}
+
+
 bool VectorFromMap(std::string key, std::map<std::string,std::string> &Map, Vector &V)
 {
     std::string Val = Map.find(key)->second;
@@ -108,6 +114,13 @@ void StringFromMap(std::string key, std::map<std::string,std::string> &Map, std:
 {
     S = Map.find(key)->second;
 }
+
+void IntFromMap(std::string key, std::map<std::string,std::string> &Map, int &i)
+{
+    std::string Val = Map.find(key)->second;
+    IntFromString(Val,i);
+}
+
 
 
 
