@@ -57,7 +57,7 @@ public:
             {
                 CCDNormal.z *= -1.0;
             }
-            //CCDNormal = CCDNormal * -1.0;
+            //CCDNormal = CCDNormal * -1.0; Don't do it this way!
         }
 
         cout << "CCDNormal:\t";

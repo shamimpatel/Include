@@ -337,5 +337,38 @@ void GetAlternateThetaPhi(Vector V, double &Theta, double &Phi)
     return;
 }
 
+void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut, double &DistToPlane)
+{
+    PlaneNormalOut = PlaneNormal;
+    
+    if(PlaneNormalOut.Magnitude() != 1.0)
+    {
+        PlaneNormalOut = PlaneNormalOut.Normalized();
+    }
+    
+    if(PlaneOrigin.Dot(PlaneNormalOut) < 0.0)
+    {
+        //cout << "Input Normal points towards Origin" << endl;
+        //need to check like this or 0.0 --> -0.0
+        //-0.0 with the trig functions goes to the other end of the output range.
+        if(PlaneNormalOut.x != 0.0)
+        {
+            PlaneNormalOut.x *= -1.0;
+        }
+        if(PlaneNormalOut.y != 0.0)
+        {
+            PlaneNormalOut.y *= -1.0;
+        }
+        if(PlaneNormalOut.z != 0.0)
+        {
+            PlaneNormalOut.z *= -1.0;
+        }
+    
+    }
+    
+    DistToPlane = PlaneNormalOut.Dot(PlaneOrigin);
+}
+
+
 
 #endif
