@@ -20,11 +20,11 @@ public:
 
 public:
     CCD(Vector InputCCDOrigin, Vector InputCCDNormal, double InputCCDAngle,
-        double XPixelWidth, double YPixelWidth,
+        int numXPixels, int numYPixels,
         double InputCCDXSize, double InputCCDYSize)
     {
-        this->XPixelWidth = XPixelWidth;
-        this->YPixelWidth = YPixelWidth;
+        this->XPixelWidth = InputCCDXSize/double(numXPixels);
+        this->YPixelWidth = InputCCDYSize/double(numYPixels);
 
         this->InputCCDXSize = InputCCDXSize;
         this->InputCCDYSize = InputCCDYSize;
@@ -34,11 +34,11 @@ public:
         this->InputCCDXMax = InputCCDXSize/2.0;
         this->InputCCDYMax = InputCCDYSize/2.0;
 
-        this->nXPixels = InputCCDXSize/XPixelWidth;
-        this->nYPixels = InputCCDYSize/YPixelWidth;
+        this->nXPixels = numXPixels;
+        this->nYPixels = numYPixels;
         
         
-        cout << "NumXPixels:\t" << nXPixels << "\tNumYPixels:\t" << nYPixels << endl;
+        cout << "XPixelWidth:\t" << XPixelWidth << "\tYPixelWidth:\t" << YPixelWidth << endl;
         
         CCDNormal = InputCCDNormal;
         CCDOrigin = InputCCDOrigin;
@@ -91,7 +91,7 @@ public:
         if(fabs(CCDXAxis.Dot(CCDYAxis.Cross(CCDNormal)) - 1.0) >= 0.0001)
         {
             cout << "Error: CCD Axes and CCD Normal not orthogonal!" << endl;
-            exit(0);
+            exit(1);
         }
 
         //spin around input normal not the "real" normal which may be modified.
@@ -199,21 +199,27 @@ CCD GenerateCCDFromInputScript( std::string Filename )
     double InputCCDYSize = 0.0;
     
     
-    double InputCCDXPixelSize = 0.05;
-    double InputCCDYPixelSize = 0.05;
+    //double InputCCDXPixelSize = 0.05;
+    //double InputCCDYPixelSize = 0.05;
+    int NumXPixels, NumYPixels;
     
     VectorFromMap("CCDOrigin",InputData,InputCCDOrigin);
     VectorFromMap("CCDNormal",InputData,InputCCDNormal);
     DoubleFromMap("CCDAngle", InputData,InputCCDAngle);
 
-    DoubleFromMap("CCDXPixelSize", InputData, InputCCDXPixelSize);
-    DoubleFromMap("CCDYPixelSize", InputData, InputCCDYPixelSize);
+    //DoubleFromMap("CCDXPixelSize", InputData, InputCCDXPixelSize);
+    //DoubleFromMap("CCDYPixelSize", InputData, InputCCDYPixelSize);
+    
+    IntFromMap("CCDNumXPixels", InputData, NumXPixels);
+    IntFromMap("CCDNumYPixels", InputData, NumYPixels);
+    
+    
     DoubleFromMap("CCDXSize", InputData, InputCCDXSize);
     DoubleFromMap("CCDYSize", InputData, InputCCDYSize);
     
     
     CCD CCDCamera(InputCCDOrigin, InputCCDNormal, InputCCDAngle,
-                  InputCCDXPixelSize, InputCCDYPixelSize,
+                  NumXPixels, NumYPixels,
                   InputCCDXSize, InputCCDYSize);
     
     return CCDCamera;
