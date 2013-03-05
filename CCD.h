@@ -3,31 +3,43 @@
 
 #include <cstdlib>
 #include "Vector.h"
+#include "FileReading.h"
 
 
 class CCD
 {
+public:
     Vector CCDNormal, CCDOrigin, CCDXAxis, CCDYAxis;
     double DistToPlane;
 
     double XPixelWidth, YPixelWidth;
-    double InputCCDXMin, InputCCDXMax, InputCCDYMin, InputCCDYMax;
+    double InputCCDXMin, InputCCDXMax, InputCCDYMin, InputCCDYMax, InputCCDXSize, InputCCDYSize;
+    
+    int nXPixels;
+    int nYPixels;
 
 public:
     CCD(Vector InputCCDOrigin, Vector InputCCDNormal, double InputCCDAngle,
         double XPixelWidth, double YPixelWidth,
-        double InputCCDXMin, double InputCCDXMax,
-        double InputCCDYMin, double InputCCDYMax)
+        double InputCCDXSize, double InputCCDYSize)
     {
         this->XPixelWidth = XPixelWidth;
         this->YPixelWidth = YPixelWidth;
 
-        this->InputCCDXMin = InputCCDXMin;
-        this->InputCCDYMin = InputCCDYMin;
-        this->InputCCDXMax = InputCCDXMax;
-        this->InputCCDYMax = InputCCDYMax;
+        this->InputCCDXSize = InputCCDXSize;
+        this->InputCCDYSize = InputCCDYSize;
+        
+        this->InputCCDXMin = -InputCCDXSize/2.0;
+        this->InputCCDYMin = -InputCCDYSize/2.0;
+        this->InputCCDXMax = InputCCDXSize/2.0;
+        this->InputCCDYMax = InputCCDYSize/2.0;
 
-
+        this->nXPixels = InputCCDXSize/XPixelWidth;
+        this->nYPixels = InputCCDYSize/YPixelWidth;
+        
+        
+        cout << "NumXPixels:\t" << nXPixels << "\tNumYPixels:\t" << nYPixels << endl;
+        
         CCDNormal = InputCCDNormal;
         CCDOrigin = InputCCDOrigin;
 
@@ -142,6 +154,9 @@ public:
         {
             outY = outY - 1;
         }
+        
+        outX += nXPixels/2;
+        outY += nYPixels/2;
     }
 
     bool GetPixelRayCCDIntersect(Vector RaySource, Vector RayDirection,
@@ -161,5 +176,48 @@ public:
         return true;
     }
 };
+
+
+CCD GenerateCCDFromInputScript( std::string Filename )
+{
+    ifstream datafile(Filename.c_str());
+    if(datafile.is_open() == false)
+    {
+        cout << "Error: Failed to open InputScript.txt" << endl;
+        exit(1);
+    }
+    std::map<std::string,std::string> InputData;
+    AddToMapFromFile(datafile, InputData);
+    datafile.close();
+    
+    Vector InputCCDOrigin(110,-1,50); //origin of CCD
+    Vector InputCCDNormal(0,0,1); //direction that CCD points in.
+    double InputCCDAngle = 0;
+    
+    
+    double InputCCDXSize = 0.0;
+    double InputCCDYSize = 0.0;
+    
+    
+    double InputCCDXPixelSize = 0.05;
+    double InputCCDYPixelSize = 0.05;
+    
+    VectorFromMap("CCDOrigin",InputData,InputCCDOrigin);
+    VectorFromMap("CCDNormal",InputData,InputCCDNormal);
+    DoubleFromMap("CCDAngle", InputData,InputCCDAngle);
+
+    DoubleFromMap("CCDXPixelSize", InputData, InputCCDXPixelSize);
+    DoubleFromMap("CCDYPixelSize", InputData, InputCCDYPixelSize);
+    DoubleFromMap("CCDXSize", InputData, InputCCDXSize);
+    DoubleFromMap("CCDYSize", InputData, InputCCDYSize);
+    
+    
+    CCD CCDCamera(InputCCDOrigin, InputCCDNormal, InputCCDAngle,
+                  InputCCDXPixelSize, InputCCDYPixelSize,
+                  InputCCDXSize, InputCCDYSize);
+    
+    return CCDCamera;
+
+}
 
 #endif // _CCD_H_
