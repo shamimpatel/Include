@@ -182,24 +182,20 @@ public:
         for( int i = 0; i < NumLatticePlanes; i++) //loop through each lattice plane
         {
             float ScatterProb;
-
+            float weight = fIndex - float(Index);
             if(Index >= (int(DiffDataLines.size()) - 1) )
             {
                 ScatterProb = DiffDataLines[DiffDataLines.size() - 1].ScatterProbs[i]; //just pull out the last one
             }
-
-            if(Index < 0 )
+            else if(Index < 0 )
             {
                 ScatterProb = DiffDataLines[0].ScatterProbs[i];
             }
+            else
+            {                
+                ScatterProb = lerp(DiffDataLines[Index].ScatterProbs[i], DiffDataLines[Index + 1].ScatterProbs[i], weight);
+            }
 
-            float weight = fIndex - float(Index);
-
-            ScatterProb = lerp(DiffDataLines[Index].ScatterProbs[i], DiffDataLines[Index + 1].ScatterProbs[i], weight);
-
-            //ProbSum += ScatterProb;
-
-            //if( R < ProbSum )
             if( (*uni)() < ScatterProb)
             {
                 if(Index >= (int(DiffDataLines.size()) - 1) )

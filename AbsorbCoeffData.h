@@ -87,6 +87,11 @@ class AbsorbCoeffData
   void LoadData( const char* Filename )
   {
     ifstream datafile(Filename);
+    if(datafile.is_open() == false)
+    {
+        cout << "Error: Failed to open Absorption Coefficient file: " << Filename << endl;
+        exit(1);
+    }
     string dataline;
 
     std::vector<AbsorbCoeffDataPoint> AbsorbCoeffFileData;

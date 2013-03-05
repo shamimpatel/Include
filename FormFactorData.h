@@ -81,6 +81,11 @@ class FormFactorData
   void LoadData( const char* Filename )
   {
     ifstream datafile(Filename);
+    if(datafile.is_open() == false)
+    {
+        cout << "Error: Failed to open FormFactor file: " << Filename << endl;
+        exit(1);
+    }
     string dataline;
 
     std::vector<FormFactorDataPoint> FormFactorFileData;
