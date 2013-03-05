@@ -65,6 +65,7 @@ class LatticePlane
     return BraggReflectXRay( Ray.Direction, Ray.Wavelength);
   }
 
+  //if the direction (and therefore angle) don't match up with the plane and wavelength then this is meaningless
   Vector BraggReflectXRay( Vector Direction, float Wavelength)
   {
     return Wavelength*H + Direction;
@@ -104,68 +105,6 @@ class LatticePlane
 
     //fabs to push values <0 to >0
     return fabs(angle);
-  }
-
-  float CalculatePhi_0( float Wavelength )
-  {
-    return NegElectronRadius_PI_V*F0Real*Wavelength*Wavelength;
-  }
-
-  float CalculatePhi_H( float Wavelength )
-  {
-    //float BraggAngle = FindBraggReflectionAngle( Wavelength );
-
-    //BraggAngle is asin( HalfmagH*wavelength. So x is just HalfMagH IF the reflection is valid.
-
-    //The Bragg angle is half the scattering angle which is what we need for x
-    //float x = sin( BraggAngle )/Wavelength;
-
-    if( ( Wavelength * HalfMagH ) > 1.0f )
-    {
-      //if the Bragg reflection isn't allowed just make this small. This will
-      //blow up g which results in high absorption and so no reflection
-      //TODO: Check this thoroughly
-      return NegElectronRadius_PI_V*0.001f*Wavelength*Wavelength;
-    }
-    else
-    {
-      float F = FormFacData->GetFormFactorDataPoint( HalfMagH );
-
-      return NegElectronRadius_PI_V*F*Wavelength*Wavelength;
-    }
-
-  }
-
-  float CalculateKappa( float Wavelength )
-  {
-    return 0.0f; //Don't have full form factor data yet.
-  }
-
-  float Calculate_g( float Wavelength )
-  {
-    return 0.0f;
-  }
-
-  //ratio of cosines rather than full expression. May or may not make a difference....
-  float CalculateSimple_b( float Wavelength )
-  {
-    return 0.0f;
-  }
-
-  float CalculateLPFactor( float Wavelength )
-  {
-    float BraggTheta = FindBraggReflectionAngle( Wavelength );
-
-    if( BraggTheta < 0.0f )
-    {
-      return 0.0f; //return a width of zero to supress bragg reflections
-    }
-    else
-    {
-      float cos2theta = cos( BraggTheta*2.0f );
-      float sintheta = sin( BraggTheta );
-      return (1+ cos2theta*cos2theta)/(8*sintheta*sintheta*cos(BraggTheta));
-    }
   }
 
   float CalculatePowderScatter( float Wavelength) //mu in A^-1
@@ -218,102 +157,6 @@ class LatticePlane
       //Factor of 2.35 comes from FWHM->gaussian sigma.
       return (0.94f*Wavelength)/(2.35482*CrystalLength*cos(BraggTheta));
     }
-  }
-
-  float CalculateIntensitySimple( float Wavelength, float Theta, float Width)
-  {
-    float BraggAngle = FindBraggReflectionAngle( Wavelength );
-    if( BraggAngle < 0.0f )
-    {
-      return 0.0f;
-    }
-    else
-    {
-      return CalculateIntensitySimple( Wavelength, Theta, Width, BraggAngle);
-    }
-  }
-
-
-  float CalculateIntensitySimple( float Wavelength, float Theta, float Width, float BraggAngle)
-  {
-    /*float sinTheta = Wavelength * HalfMagH;
-
-    if( sinTheta > 1.0f ) //always positive so no need to check for < -1.0f
-    {
-      //if the Bragg reflection isn't allowed just return 0;
-      return 0.0f;
-    }
-
-    float BraggTheta = asin( sinTheta );*/
-
-    /*float BraggTheta = FindBraggReflectionAngle( Wavelength );
-    if( BraggTheta < 0.0f )
-    {
-      return 0.0f;
-      }*/
-
-    if(BraggAngle < 0.0f)
-    {
-      return 0.0f;
-      //an early exit like this is marginally faster than using a junk value of BraggTheta and completing the calculation
-    }
-
-
-    float AbsDiff = fabs( BraggAngle - Theta );
-
-
-    if( AbsDiff <= Width )
-    {
-      //float Max = 1.0f/Width;
-
-      return (Width - AbsDiff)/Width;//*Max;
-    }
-    else
-    {
-      return 0.0f;
-    }
-
-  }
-
-  float CalculateIntensity( float Wavelength, float Theta )
-  {
-    float Phi_0 = CalculatePhi_0( Wavelength );
-
-    float sinTheta = Wavelength * HalfMagH;
-
-
-
-    if( sinTheta > 1.0f ) //always positive so no need to check for < -1.0f
-    {
-      //if the Bragg reflection isn't allowed just return 0;
-      return 0.0f;
-    }
-
-    float F = FormFacData->GetFormFactorDataPoint( HalfMagH );
-
-    float Phi_H = 0.0f;
-
-    Phi_H = NegElectronRadius_PI_V*F*Wavelength*Wavelength;
-
-
-    float BraggTheta = asin( sinTheta );
-
-
-    float alpha = 2.0f * (BraggTheta - Theta) * sin( 2.0f * BraggTheta );
-    //optimize: calc Alpha/2 instead
-
-    float K_PolFac = 0.5f*(1.0f + fabs( cos(2.0f * BraggTheta) ) );
-
-    float y = (Phi_0 - alpha/2.0f)/(K_PolFac * fabs( Phi_H ));
-
-    float y1 = (y*y - 1);
-
-    y1 = y1*y1; // (y^2 -1)^2
-
-    float L = sqrt( y1 ) + y*y;
-
-    return ( L - sqrt( L*L - 1.0f ) );
-
   }
 
 
