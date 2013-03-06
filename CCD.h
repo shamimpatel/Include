@@ -43,12 +43,11 @@ public:
         CCDNormal = InputCCDNormal;
         CCDOrigin = InputCCDOrigin;
 
-        CCDXAxis = Vector(1,0,0);
-        CCDYAxis = Vector(0,1,0);
+
 
         if( InputCCDNormal.Magnitude() != 1.0)
         {
-            cout << "Input Normal not normalized" << endl;
+            cout << "CCD Input Normal not normalized" << endl;
             CCDNormal = InputCCDNormal.Normalized();
         }
 
@@ -77,6 +76,10 @@ public:
 
         DistToPlane = CCDNormal.Dot(CCDOrigin);
 
+        
+        CCDXAxis = Vector(1,0,0);
+        CCDYAxis = Vector(0,1,0);
+        
         double NormalTheta, NormalPhi;
         GetAlternateThetaPhi( CCDNormal, NormalTheta, NormalPhi );
 
