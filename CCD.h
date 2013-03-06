@@ -21,7 +21,8 @@ public:
 public:
     CCD(Vector InputCCDOrigin, Vector InputCCDNormal, double InputCCDAngle,
         int numXPixels, int numYPixels,
-        double InputCCDXSize, double InputCCDYSize)
+        double InputCCDXSize, double InputCCDYSize,
+        bool bFlipXAxis, bool bFlipYAxis)
     {
         this->XPixelWidth = InputCCDXSize/double(numXPixels);
         this->YPixelWidth = InputCCDYSize/double(numYPixels);
@@ -89,7 +90,7 @@ public:
 
         CCDYAxis = RotateY(CCDYAxis,NormalTheta);
         CCDYAxis = RotateZ(CCDYAxis,NormalPhi);
-
+  
         //Need small tolerance as it'll come out as 1E-8 instead of zero
         if(fabs(CCDXAxis.Dot(CCDYAxis.Cross(CCDNormal)) - 1.0) >= 0.0001)
         {
@@ -102,6 +103,16 @@ public:
         CCDXAxis = RotationAxis(CCDXAxis,InputCCDNormal.Normalized(),InputCCDAngle);
         CCDYAxis = RotationAxis(CCDYAxis,InputCCDNormal.Normalized(),InputCCDAngle);
 
+        if(bFlipXAxis)
+        {
+            CCDXAxis = -1.0*CCDXAxis;
+        }
+        
+        if(bFlipYAxis)
+        {
+            CCDYAxis = -1.0*CCDYAxis;
+        }
+        
         cout << "CCDXAxis:\t";
         CCDXAxis.Print();
         cout << "CCDYAxis:\t";
@@ -220,10 +231,26 @@ CCD GenerateCCDFromInputScript( std::string Filename )
     DoubleFromMap("CCDXSize", InputData, InputCCDXSize);
     DoubleFromMap("CCDYSize", InputData, InputCCDYSize);
     
+    int iFlipXAxis, iFlipYAxis;
+    bool bFlipXAxis = false, bFlipYAxis = false;
+    
+    IntFromMap("FlipXAxis", InputData, iFlipXAxis);
+    IntFromMap("FlipYAxis", InputData, iFlipYAxis);
+    
+    if( iFlipXAxis != 0 )
+    {
+        bFlipXAxis = true;
+    }
+    if( iFlipYAxis != 0 )
+    {
+        bFlipYAxis = true;
+    }
+        
     
     CCD CCDCamera(InputCCDOrigin, InputCCDNormal, InputCCDAngle,
                   NumXPixels, NumYPixels,
-                  InputCCDXSize, InputCCDYSize);
+                  InputCCDXSize, InputCCDYSize,
+                  bFlipXAxis, bFlipYAxis);
     
     return CCDCamera;
 
