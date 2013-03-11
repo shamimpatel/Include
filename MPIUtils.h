@@ -23,4 +23,24 @@ std::string CreateProcessorUniqueFilename( std::string Filename, std::string Ext
 }
 
 
+std::string CreateConcatCommand( std::string Filename, std::string Extension)
+{
+    int NumProcessors;
+    MPI_Comm_size(MPI_COMM_WORLD,&NumProcessors);
+    
+    stringstream S;
+    
+    S << "cat ";
+    for(int i=0;i<NumProcessors;i++)
+    {
+        S << Filename << "_P" << i << Extension << " ";
+    }
+    
+    S << "> " << Filename << Extension; //DiffractResults.txt";
+    
+    
+    return S.str();
+    
+}
+
 #endif
