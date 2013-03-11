@@ -102,7 +102,7 @@ public:
         
         SpectrumDataPoint DataPoint;
         
-        while(getline(datafile, dataline, '\r')) //excel copy/paste gives \r not \n
+        while(getline(datafile, dataline, '\n')) //excel copy/paste gives \r not \n
         {
             stringstream linestream(dataline);
             linestream >> DataPoint.Energy >> DataPoint.RelativeIntensity;
@@ -127,7 +127,7 @@ public:
         datafile.close();
     }
     
-    float GetAbsorbCoeffDataPoint( float Energy )
+    float GetSpectrumDataPoint( float Energy )
     {
         float fIndex = (Energy-Min)/(Delta);
         //return AbsorbCoeffDataPoints[int(fIndex)]; //With a large number of points this is close enough
