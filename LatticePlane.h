@@ -6,6 +6,7 @@
 #include <cmath> //included by vector.h anyway?
 #include "FormFactorData.h"
 #include "AbsorbCoeffData.h"
+#include "Integration.h"
 
 const float ElectronRadius_PI = 8.9697826E-6; //in Angstroms
 
@@ -32,16 +33,19 @@ public:
     
     float UnitCellVol;
     
+    double Temperature, DebyeTemperature;
+    double mass_amu;
     
+    double DebyeWallerPreFactor;
     
 public:
     
     float HalfMagH; //magnitude of H/2
-    
+        
     
     LatticePlane( Vector b1, Vector b2, Vector b3, int h, int k, int l,
                  FormFactorData* FormFacData, float UnitCellVol, AbsorbCoeffData* AbsorbCoData,
-                 int Multiplicity)
+                 int Multiplicity, double DebyeWallerPreFactor)
     {
         this->b1 = b1;
         this->b2 = b2;
@@ -58,6 +62,8 @@ public:
         this->UnitCellVol = UnitCellVol;
         this->AbsorbCoData = AbsorbCoData;
         this->Multiplicity = Multiplicity;
+        
+        this->DebyeWallerPreFactor = DebyeWallerPreFactor;
     }
     
     Vector BraggReflectXRay( XRay Ray )
@@ -159,32 +165,49 @@ public:
         }
     }
     
-    float CalculateDebyeWallerFactor( float Wavelength, float Temperature, float DebyeTemperature,float Mass )
+    float CalculateDebyeWallerFactor( float Wavelength )
     {
-        float BraggTheta = FindBraggReflectionAngle( Wavelength );
+        double BraggTheta = FindBraggReflectionAngle( Wavelength );
         
         if( BraggTheta < 0.0f )
         {
             return 0.0f; //return an intensity of zero.
         }
         
-        float SinTheta_Lambda = sin(BraggTheta)/Wavelength;
+        double SinTheta_Lambda = sin(BraggTheta)/Wavelength;
         
-        float IntegralFactor = 1.0;
+        double TwoM = DebyeWallerPreFactor*SinTheta_Lambda*SinTheta_Lambda;
         
-        //2M
-        float TwoM = 2.29816*Temperature*(1/(DebyeTemperature*DebyeTemperature))*(1/Mass)*IntegralFactor*SinTheta_Lambda*SinTheta_Lambda;
-        
-        return exp( -1.0*TwoM);
+        return exp( -1.0*TwoM );
     }
     
     
     Vector GeometricalReflectXRay( Vector Direction )
     {
-        return -2*( Direction.Dot( UnitH ) * UnitH ) + Direction;
+        return -2.0*( Direction.Dot( UnitH ) * UnitH ) + Direction;
     }
 
 };
+
+double DebyeFunc( double z )
+{
+    if(z == 0.0)
+    {
+        return 0.0;
+    }
+    
+    return z/(exp(z)-1);
+}
+
+//See Eq 11.77, page 190 of Warren for where this comes from.
+double CalculateDebyeWallerPreFactor(double Temp, double DebyeTemp, double mass_amu)
+{
+    double x = DebyeTemp/Temp;
+    double IntegralPart = Compute1DIntegral(DebyeFunc, 0, x, 0.00001)*(1/x) + 0.25*x;
+    double PreFactor = (IntegralPart*22998.4*Temp)/(mass_amu*DebyeTemp*DebyeTemp);
+    return PreFactor;
+}
+
 
 
 #endif
