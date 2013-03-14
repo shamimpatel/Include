@@ -16,7 +16,7 @@
 using namespace std;
 
 #ifndef base_generator_type
-  typedef boost::mt11213b base_generator_type;
+  typedef boost::mt19937 base_generator_type;
 #endif
 
 
