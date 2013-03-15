@@ -102,11 +102,16 @@ public:
         
         SpectrumDataPoint DataPoint;
         
-        while(getline(datafile, dataline, '\n')) //excel copy/paste gives \r not \n
+        while(getline(datafile, dataline, '\r')) //excel copy/paste gives \r not \n
         {
             stringstream linestream(dataline);
             linestream >> DataPoint.Energy >> DataPoint.RelativeIntensity;
-            
+           
+            if(DataPoint.RelativeIntensity < 0.0)
+            {
+                DataPoint.RelativeIntensity = 0.0;
+            }
+           
             SpectrumFileData.push_back( DataPoint );
         }
         
