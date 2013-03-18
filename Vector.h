@@ -369,6 +369,20 @@ void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut
     DistToPlane = PlaneNormalOut.Dot(PlaneOrigin);
 }
 
-
+//TODO: Come up with a new name for this
+//Function to take a vector from coordinate frame A to B where in A the vector 0,0,1 gets rotated to (theta,phi,1 [spherical coordinates])
+//theta and phi describe the new frame, Vin is the input.
+Vector TransformToNewFrame( const Vector Vin, const double theta, const double phi)
+{
+    double CT = cos(theta);
+    double ST = sin(theta);
+    double CP = cos(phi);
+    double SP = sin(phi);
+    Vector VOut( CP*CT*Vin.x - SP*Vin.y + CP*ST*Vin.z,
+                SP*CT*Vin.x + CP*Vin.y + SP*ST*Vin.z,
+                CT*Vin.z - ST*Vin.x);
+    
+    return VOut;
+}
 
 #endif

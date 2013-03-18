@@ -22,7 +22,7 @@ double Compute1DIntegral( double (*F)(double), double lowerLimit, double upperLi
     
     double ExtraTerms = (x0 + xN)*dx*0.5;
     
-    for( int Step = 1; Step <= nSteps; Step++)
+    for( int Step = 1; Step < nSteps; Step++)
     {
         double x = lowerLimit + dx*Step;
         Sum += F(x)*dx;
