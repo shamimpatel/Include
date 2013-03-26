@@ -38,17 +38,23 @@ public:
         this->nXPixels = numXPixels;
         this->nYPixels = numYPixels;
         
-        
+#ifndef _USING_MPI_
         cout << "XPixelWidth:\t" << XPixelWidth << "\tYPixelWidth:\t" << YPixelWidth << endl;
+#else
+        MPI_cout << "XPixelWidth:\t" << XPixelWidth << "\tYPixelWidth:\t" << YPixelWidth << endl;
+#endif
         
         CCDNormal = InputCCDNormal;
         CCDOrigin = InputCCDOrigin;
 
-
-
         if( InputCCDNormal.Magnitude() != 1.0)
         {
+#ifndef _USING_MPI_
             cout << "CCD Input Normal not normalized" << endl;
+#else
+            MPI_cout << "CCD Input Normal not normalized" << endl;
+#endif
+            
             CCDNormal = InputCCDNormal.Normalized();
         }
 
@@ -72,8 +78,12 @@ public:
             //CCDNormal = CCDNormal * -1.0; Don't do it this way!
         }
 
+#ifndef _USING_MPI_
         cout << "CCDNormal:\t";
         CCDNormal.Print();
+#else
+        MPI_cout << "CCDNormal:\t" << CCDNormal.x << "\t" << CCDNormal.y << "\t" << CCDNormal.z << endl;
+#endif
 
         DistToPlane = CCDNormal.Dot(CCDOrigin);
 
@@ -112,11 +122,17 @@ public:
         {
             CCDYAxis = -1.0*CCDYAxis;
         }
-        
+
+#ifndef _USING_MPI_
         cout << "CCDXAxis:\t";
         CCDXAxis.Print();
         cout << "CCDYAxis:\t";
         CCDYAxis.Print();
+#else
+        MPI_cout << "CCDXAxis:\t" << CCDXAxis.x << "\t" << CCDXAxis.y << "\t" << CCDXAxis.z << endl;
+        MPI_cout << "CCDYAxis:\t" << CCDYAxis.x << "\t" << CCDYAxis.y << "\t" << CCDYAxis.z << endl;
+#endif
+                
 
     }
 

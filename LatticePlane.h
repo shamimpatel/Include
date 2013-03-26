@@ -128,18 +128,19 @@ public:
         float F1 = FormFacData->GetFormFactorDataPoint( HalfMagH );
         
         float r_e = 2.818E-5; //classical electron radius in A
-        
-        //float M = 6; //multiplicity. TODO: actually calculate this
-        
+                
         //mu is in A^-1
         float mu = AbsorbCoData->GetAbsorbCoeffDataPoint( Wavelength );
         
         float density = 16.69f; // in g/cm^3
         
-        //1E8 as mu is in A^-1. Want cm^-1 which then gets converted to cm^2/g
-        float F2 = ( 1E8 * (mu/density) * (12.39842f/Wavelength) )/(232.54f);
+                     
+        //1E8 as mu is in A^-1. Want cm^-1 which then gets converted to cm^2/g as it is divided by the density
+        //the 232.54 comes from 4pi*Avagadro*electronradius*hbar*c / 1keV * Atomic mass (in amu)
+        float F2 = ( float(1E8) * (mu/density) * (12.39842f/Wavelength) )/(232.54f);
         
-        float ModFSquare = F1*F1 + F2*F2; // always +ve so no need for fabs
+        
+        float ModFSquare = 4*(F1*F1 + F2*F2); // always +ve so no need for fabs
         
         float Cos2Theta = cos(2*BraggTheta);
         

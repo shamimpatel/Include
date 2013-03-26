@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sstream>
 #include "mpi.h"
+#include "MPICout.h"
 using namespace std;
 
 std::string CreateProcessorUniqueFilename( std::string Filename, std::string Extension)

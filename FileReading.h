@@ -100,23 +100,43 @@ void IntFromString(std::string S, int &x)
 
 bool VectorFromMap(std::string key, std::map<std::string,std::string> &Map, Vector &V)
 {
+    if( Map.count(key) == 0)
+    {
+        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+    }    
+    
     std::string Val = Map.find(key)->second;
     return VectorFromString(Val, V);
 }
 
 void DoubleFromMap(std::string key, std::map<std::string,std::string> &Map, double &x)
 {
+    if( Map.count(key) == 0)
+    {
+        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+    }
+    
     std::string Val = Map.find(key)->second;
     DoubleFromString(Val, x);
 }
 
 void StringFromMap(std::string key, std::map<std::string,std::string> &Map, std::string &S)
 {
+    if( Map.count(key) == 0)
+    {
+        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+    }
+    
     S = Map.find(key)->second;
 }
 
 void IntFromMap(std::string key, std::map<std::string,std::string> &Map, int &i)
 {
+    if( Map.count(key) == 0)
+    {
+        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+    }
+    
     std::string Val = Map.find(key)->second;
     IntFromString(Val,i);
 }

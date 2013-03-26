@@ -8,7 +8,7 @@
 
 #ifndef _SPECTRUMDATA_H_
 #define _SPECTRUMDATA_H_
-
+/*
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -16,9 +16,11 @@
 #include <string>
 #include <sstream>
 #include <cmath>
-#include <algorithm>
+#include <algorithm>*/
 
 #include "Integration.h"
+#include "DataLoader.h"
+
 
 using namespace std;
 
@@ -40,8 +42,9 @@ bool SpectrumDataLssThnComp( SpectrumDataPoint A, SpectrumDataPoint B)
     }
 }
 
-class SpectrumData
+class SpectrumData : public DataLoader
 {
+    /*
 private:
     float Min, Max;
     int NumDataPoints;
@@ -76,21 +79,18 @@ private:
         }
         
         return DummySearch;
-    }
+    }*/
     
 public:
     
     
-    SpectrumData(float Min, float Max, int NumDataPoints)
+    SpectrumData(float MinE, float MaxE, int NumDataColumns, int NumDataPoints, const char* Filename) : DataLoader( MinE, MaxE, NumDataColumns, NumDataPoints, Filename)
     {
-        this->Min = Min;
-        this->Max = Max;
-        this->NumDataPoints = NumDataPoints;
     }
     
     
 public:
-    void LoadData( const char* Filename )
+    /*void LoadData( const char* Filename )
     {
         ifstream datafile(Filename);
         if(datafile.is_open() == false)
@@ -132,11 +132,11 @@ public:
         }
         
         datafile.close();
-    }
+    }*/
     
     float GetSpectrumDataPoint( float Energy )
     {
-        float fIndex = (Energy-Min)/(Delta);
+        /*float fIndex = (Energy-Min)/(Delta);
         //return AbsorbCoeffDataPoints[int(fIndex)]; //With a large number of points this is close enough
         
         //Code below linearly interpolates to find the "best" value.
@@ -156,7 +156,8 @@ public:
         
         float weight = fIndex - int(fIndex);
                 
-        return lerp(SpectrumDataPoints[int(fIndex)], SpectrumDataPoints[int(fIndex) + 1], weight);
+        return lerp(SpectrumDataPoints[int(fIndex)], SpectrumDataPoints[int(fIndex) + 1], weight);*/
+        return this->GetDataPoint(Energy).ColumnValues[0];
     }
     
     double IntegrateSpectrum( float MinE, float MaxE, float dE)
@@ -219,11 +220,7 @@ public:
         
     }
     
-    
-    float lerp( float start, float end, float weight)
-    {
-        return start + ((end-start)*weight);
-    }
+
     
 };
 
