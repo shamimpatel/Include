@@ -14,6 +14,9 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <cstdlib>
+#include <algorithm>
+
 
 using namespace std;
 
@@ -151,7 +154,7 @@ public:
         DataPoint SearchPoint;
         SearchPoint.x = x;
         
-        vector<DataPoint>::iterator C = lower_bound( DataFile->begin(),
+        vector<DataPoint>::iterator C = std::lower_bound( DataFile->begin(),
                                                     DataFile->end(),
                                                     SearchPoint,
                                                     DataPointLssThnComp );

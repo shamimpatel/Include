@@ -179,7 +179,7 @@ public:
     }
     
     
-    void GetEnergyIntervals( int numIntervals, std::vector<std::pair<double, double>> *Intervals)
+    void GetEnergyIntervals( int numIntervals, std::vector<std::pair<double, double> > *Intervals)
     {
         Intervals->clear();
         double dE = 0.0001;
@@ -191,7 +191,7 @@ public:
         double E = Min;
         double Sum = 0.0;
         
-        while( Intervals->size() < numIntervals )
+        while( int(Intervals->size()) < numIntervals )
         {
             double RequiredIntegral = TotalIntegratedSpectrum*double(Intervals->size() + 1)/double(numIntervals);
             
@@ -206,11 +206,11 @@ public:
                 {
                     break;
                 }                
-            }
-            
+            }            
             Interval.second = E;
             Intervals->push_back(Interval);
-            IntervalMinimum = E;            
+            IntervalMinimum = E;
+			cout << "Created " << Intervals->size() << " intervals" << endl;
         }
         
         if( (*Intervals)[Intervals->size() - 1].second > Max)

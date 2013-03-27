@@ -13,7 +13,10 @@
 #include <mpi.h>
 using namespace std;
 
-typedef basic_ostream<char,char_traits<char>> cout_type;
+
+
+typedef basic_ostream<char,char_traits<char>  > cout_type;
+
 class __MPI_cout
 {
     //Processor that will be allowed to output;
@@ -50,8 +53,8 @@ public:
         }
     }
             
-    __MPI_cout& operator<<(basic_ios<char,char_traits<char>>&
-                          (*__pf)(basic_ios<char,char_traits<char>>&))
+    __MPI_cout& operator<<(basic_ios<char,char_traits<char>  >&
+                          (*__pf)(basic_ios<char,char_traits<char>  >&))
     {
         int ProcNum;
         MPI_Comm_rank(MPI_COMM_WORLD,&ProcNum);
@@ -262,7 +265,7 @@ public:
             return *(this);
         }
     }
-    __MPI_cout& operator<<(basic_streambuf<char,char_traits<char>>* __sb)
+    __MPI_cout& operator<<(basic_streambuf<char,char_traits<char>  >* __sb)
     {        
         int ProcNum;
         MPI_Comm_rank(MPI_COMM_WORLD,&ProcNum);

@@ -14,7 +14,7 @@
 #include "MPICout.h"
 using namespace std;
 
-std::string CreateProcessorUniqueFilename( std::string Filename, std::string Extension)
+std::string CreateProcessorUniqueFilename( const char* Filename, const char* Extension)
 {
     std::stringstream S;
     int ProcNum;
@@ -24,7 +24,7 @@ std::string CreateProcessorUniqueFilename( std::string Filename, std::string Ext
 }
 
 
-std::string CreateConcatCommand( std::string Filename, std::string Extension)
+std::string CreateConcatCommand( const char* Filename, const char* Extension)
 {
     int NumProcessors;
     MPI_Comm_size(MPI_COMM_WORLD,&NumProcessors);
