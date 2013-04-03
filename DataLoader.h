@@ -142,10 +142,10 @@ public:
         
         datafile.close();
         
-        for(int i = 0; i < int(DataPoints.size()); i++)
+       /* for(int i = 0; i < int(DataPoints.size()); i++)
         {
             //cout << DataPoints[i].x << "\t" << DataPoints[i].ColumnValues[0] << endl;
-        }
+        }*/
         
     }
     
