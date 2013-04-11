@@ -7,7 +7,7 @@
 #include "FormFactorData.h"
 //#include "LatticePlane.h"
 #include "AbsorbCoeffData.h"
-#include <float.h>
+//#include <float.h>
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -42,33 +42,7 @@ class PowderDiffraction
 
     boost::variate_generator<base_generator_type&, boost::uniform_real<> > *uni;
 
- /*   float UniformRand()
-    {
-        return float(rand()) / (float(RAND_MAX)+1.0);
-    }
-
-    double DblUniformRand()
-    {
-        double r = 0.0;
-        double s = 1.0;
-
-        //do {
-          //s /= RAND_MAX + 1.0;
-          //r += rand() * s;
-          //nloops++;
-          //} while (s > DBL_EPSILON);
-
-        s /= RAND_MAX + 1.0; //on OSX 2 runs seems to be enough. Should check for other platforms.
-        r += rand() * s;
-        s /= RAND_MAX + 1.0;
-        r += rand() * s;
-
-        return r;
-    }
-*/
-
-
-public:
+ public:
     PowderDiffraction( float LatticeConst, boost::variate_generator<base_generator_type&, boost::uniform_real<> > *Generator )
     {
         this->a0 = LatticeConst;
@@ -167,13 +141,11 @@ public:
 
         NumLatticePlanes = int(DiffDataLines[0].BraggAngles.size());
 
-        MPI_cout << "MinE: " << MinE << "\tMaxE: " << MaxE << "\tDeltaE: " << DeltaE << endl;
+        MPI_cout << "DiffractionData: MinE: " << MinE << "\tMaxE: " << MaxE << "\tDeltaE: " << DeltaE << endl;
     }
 
     float PickBraggScatteringAngle( float Energy, float &RockingCurve )
     {
-        //float ProbSum = 0.0f;
-
         float fIndex = (Energy-MinE)/DeltaE;
         int Index = int(fIndex); //Energy Index
 

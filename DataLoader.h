@@ -40,15 +40,16 @@ bool DataPointLssThnComp( DataPoint A, DataPoint B)
 
 class DataLoader
 {
-public:
+protected:
     double Min, Max, Delta;
     int NumDataColumns, NumDataPoints;
     std::string FileName;
     
     std::vector< DataPoint > DataPoints;
     
-    void LoadData( const char* Filename)
+    void LoadData( const char* Filename, bool bSkipFirstLine)
     {
+		this->FileName = Filename;
         ifstream datafile;
         datafile.open(Filename, ios::in);
         
@@ -61,18 +62,28 @@ public:
         
          //excel copy/paste gives \r not \n so need to check for this
         char NewlineChar = '\n', ReturnChar = '\r';
-        char Character = '\0';
-        do
-        {         
-            datafile.get(Character);
-            if(Character == '\0')
-            {
-                cout << "Error: Could not find end of line character in datafile: " << Filename << endl;
-                exit(1);
-            }
-        }
-        while ( Character != NewlineChar && Character != ReturnChar );
-        
+        char EndLineCharacter = '\0';
+		do
+		{
+			datafile.get(EndLineCharacter);
+			if(EndLineCharacter == '\0')
+			{
+				cout << "Error: Could not find end of line character in datafile: " << Filename << endl;
+				exit(1);
+			}
+			/*if( EndLineCharacter == NewlineChar || EndLineCharacter == ReturnChar )
+			{
+				break;
+			}*/
+		} while ( EndLineCharacter != NewlineChar && EndLineCharacter != ReturnChar );
+		
+		/*
+		if( EndLineCharacter != NewlineChar && EndLineCharacter != ReturnChar ) //can hit this if file is not properly formatted
+		{
+			cout << "Error: Could not find end of line character in datafile: " << Filename << endl;
+			exit(1);
+		}*/
+		
         datafile.seekg(0); //seek back to beginning as we have just read a line of the file.
 
         
@@ -85,7 +96,12 @@ public:
         double FileMin, FileMax;
         bool bFirstIteration = true;
         
-        while(getline(datafile, dataline, Character))
+		if( bSkipFirstLine )
+		{
+			getline(datafile, dataline, EndLineCharacter); //skip ahead one line
+		}
+		
+        while(getline(datafile, dataline, EndLineCharacter))
         {
             stringstream linestream(dataline);
             
@@ -96,6 +112,14 @@ public:
                 FileMin = FileMax = Data.x;
                 bFirstIteration = false;
             }
+			else
+			{
+				if( Data.x < DataFile.back().x) //file should be in ascending order
+				{
+					cout << "Error: Datafile not sorted properly (" << Filename << ")" << endl;
+					exit(1);
+				}
+			}
             
             
             if( Data.x < FileMin)
@@ -113,6 +137,10 @@ public:
             {
                 double ColumnValue;
                 linestream >> ColumnValue;
+				
+				//Data.ColumnValues.push_back( ColumnValue );
+				
+				//doing it this way is important. Pushing the double by itself (as above) does not work! (not sure why, something about copy constructors probably)
                 Data.ColumnValues.push_back( 0.0 );
                 Data.ColumnValues[i] = ColumnValue;
             }
@@ -124,6 +152,7 @@ public:
         if (FileMin > Min || FileMax < Max )
         {
             cout << "Error: Datafile (" << Filename << ") does not cover requested bounds: " << Min << " --> " << Max << endl;
+			cout << "Detected file bounds: " << FileMin << " --> " << FileMax << endl;
             exit(1);
         }
         
@@ -141,12 +170,12 @@ public:
         }
         
         datafile.close();
-        
-       /* for(int i = 0; i < int(DataPoints.size()); i++)
+        /*
+        for(int i = 0; i < int(DataFile.size()); i++)
         {
-            //cout << DataPoints[i].x << "\t" << DataPoints[i].ColumnValues[0] << endl;
-        }*/
-        
+            cout << DataFile[i].x << "\t" << DataFile[i].ColumnValues[0] << endl;
+        }
+        */
     }
     
     DataPoint FindDataPointFromFile( float x, std::vector<DataPoint> *DataFile)
@@ -188,7 +217,7 @@ public:
     
 public:
     //Min/Max for checking data
-    DataLoader( float Min, float Max, int NumDataColumns, int NumDataPoints, const char* Filename)
+    DataLoader( float Min, float Max, int NumDataColumns, int NumDataPoints, const char* Filename, bool bSkipFirstLine = false)
     {
         if( Min > Max)
         {
@@ -202,7 +231,7 @@ public:
         this->NumDataPoints  = NumDataPoints;
         this->FileName = FileName;
         
-        LoadData(Filename);
+        LoadData(Filename, bSkipFirstLine);
         
     }
     
@@ -213,7 +242,7 @@ public:
         {
             if( fIndex > (int(DataPoints.size()) - 1) )
             {
-                cout << "Error: Requested datapoint out of range from " << FileName << endl;
+                cout << "Error: Requested datapoint (x = " << x << ") out of range from " << FileName << endl;
                 exit(1);
             }           
             
@@ -222,7 +251,7 @@ public:
         
         if(int(fIndex) < 0 )
         {
-            cout << "Error: Requested datapoint out of range from " << FileName << endl;
+            cout << "Error: Requested datapoint (x = " << x << ") out of range from " << FileName << endl;
             exit(1);
             
             //return DataPoints[0];

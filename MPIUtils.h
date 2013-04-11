@@ -37,7 +37,7 @@ std::string CreateConcatCommand( const char* Filename, const char* Extension)
         S << Filename << "_P" << i << Extension << " ";
     }
     
-    S << "> " << Filename << Extension; //DiffractResults.txt";
+    S << "> " << Filename << Extension;
     
     
     return S.str();

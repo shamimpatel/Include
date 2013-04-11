@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <vector>
 #include <map>
 #include "Vector.h"
 #include <boost/algorithm/string.hpp>
