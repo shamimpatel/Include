@@ -8,23 +8,6 @@
 float EnergyToWavelength( float Energy );
 float WavelengthToEnergy( float Wavelength );
 
-
-
-class XRay
-{
- public:
-  Vector Source, Direction;
-  float Wavelength;
-  XRay( Vector Source, Vector Direction, float Wavelength)
-  {
-    this->Source = Source;
-    this->Direction = Direction;
-    this->Wavelength = Wavelength;
-  }
-};
-
-
-
 float EnergyToWavelength( float Energy )
 {
   //Energy in keV. Wavelength in Angstroms
