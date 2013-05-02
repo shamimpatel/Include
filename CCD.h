@@ -109,7 +109,8 @@ public:
         }
 
         //spin around input normal not the "real" normal which may be modified.
-        //alternatively could have span it before rotating the ccd x/y vectors?
+		//(modified by reflection through the plane, still points along the same line)
+        //alternatively we could have span it before rotating the ccd x/y vectors?
         CCDXAxis = RotationAxis(CCDXAxis,InputCCDNormal.Normalized(),InputCCDAngle);
         CCDYAxis = RotationAxis(CCDYAxis,InputCCDNormal.Normalized(),InputCCDAngle);
 
