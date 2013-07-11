@@ -99,43 +99,78 @@ void IntFromString(std::string S, int &x)
 }
 
 
-bool VectorFromMap(std::string key, std::map<std::string,std::string> &Map, Vector &V)
+bool VectorFromMap(std::string key, std::map<std::string,std::string> &Map, Vector &V, bool bErrorOnFail = true)
 {
     if( Map.count(key) == 0)
     {
         cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
-    }    
+		if( bErrorOnFail )
+		{
+			exit(1);
+		}
+    }
     
     std::string Val = Map.find(key)->second;
-    return VectorFromString(Val, V);
+	bool bSucceed = VectorFromString(Val, V);
+	
+	if(!bSucceed)
+	{
+		cout << "Could not convert \"" << Val << "\" to a Vector" << endl;
+		
+		if( bErrorOnFail )
+		{
+			exit(1);
+		}
+		
+		return false;
+	}
+		
+	
+	
+    return true;
 }
 
-void DoubleFromMap(std::string key, std::map<std::string,std::string> &Map, double &x)
+void DoubleFromMap(std::string key, std::map<std::string,std::string> &Map, double &x, bool bErrorOnFail = true)
 {
     if( Map.count(key) == 0)
-    {
-        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+    {        
+		if( bErrorOnFail )
+		{
+			cout << "Error: Unable to find key (" << key << ") in Map" << endl;
+			exit(1);
+		}
+		cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
     }
     
     std::string Val = Map.find(key)->second;
     DoubleFromString(Val, x);
 }
 
-void StringFromMap(std::string key, std::map<std::string,std::string> &Map, std::string &S)
+void StringFromMap(std::string key, std::map<std::string,std::string> &Map, std::string &S, bool bErrorOnFail = true)
 {
     if( Map.count(key) == 0)
     {
-        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+        if( bErrorOnFail )
+		{
+			cout << "Error: Unable to find key (" << key << ") in Map" << endl;
+			exit(1);
+		}
+		cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
     }
     
     S = Map.find(key)->second;
 }
 
-void IntFromMap(std::string key, std::map<std::string,std::string> &Map, int &i)
+void IntFromMap(std::string key, std::map<std::string,std::string> &Map, int &i, bool bErrorOnFail = true)
 {
     if( Map.count(key) == 0)
     {
-        cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
+        if( bErrorOnFail )
+		{
+			cout << "Error: Unable to find key (" << key << ") in Map" << endl;
+			exit(1);
+		}
+		cout << "Warning: Unable to find key (" << key << ") in Map" << endl;
     }
     
     std::string Val = Map.find(key)->second;

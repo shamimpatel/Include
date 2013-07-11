@@ -29,9 +29,9 @@ public:
         
         this->PinholeNormal = InputNormal;
         
-        if( PinholeNormal.Magnitude() != 1.0)
+        if( fabs(PinholeNormal.Magnitude() - 1.0) > 1E-8 )
         {
-            cout << "Pinhole Input Normal not normalized" << endl;
+            cout << "Pinhole Input Normal not normalized (Diff: " << PinholeNormal.Magnitude() - 1.0 <<  ")" << endl;
             PinholeNormal = PinholeNormal.Normalized();
         }
         

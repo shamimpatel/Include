@@ -30,7 +30,7 @@ private:
 		std::string FormFacDataFilename;
 		FormFactorData* FormFacData;
 		std::string AbsorbCoeffDataFilename;
-		AbsorbCoeffData* AbsorbCoData;
+		AbsorbCoeffDataEnergy* AbsorbCoData;
 		double mass_amu;
 		double density;
 		
@@ -58,7 +58,7 @@ public:
     int Multiplicity;
     
     //FormFactorData* FormFacData;
-    static AbsorbCoeffData* AbsorbCoData;
+    static AbsorbCoeffDataEnergy* AbsorbCoData;
 	
     static double UnitCellVol;
     
@@ -91,7 +91,7 @@ public:
 	}
 	
 	static void SetupUnitCell( const char* Filename, Vector a1, Vector a2, Vector a3, double LatticeConstant,
-							  double MinE, double MaxE, AbsorbCoeffData* AbsorbCoData )
+							  double MinE, double MaxE, AbsorbCoeffDataEnergy* AbsorbCoData )
 	{
 		LatticePlane::a1 = a1;
 		LatticePlane::a2 = a2;
@@ -201,10 +201,10 @@ public:
 				FormFactorData* FormFactor = new FormFactorData( 0.0, MaxFormFactor, 1, 10000, AtomicData.FormFacDataFilename.c_str());
 				AtomicData.FormFacData = FormFactor;
 				
-				double MinWavelength = EnergyToWavelength(MaxE); MinWavelength -= MinWavelength*0.02;
-				double MaxWavelength = EnergyToWavelength(MinE); MaxWavelength += MaxWavelength*0.02;
+				//double MinWavelength = EnergyToWavelength(MaxE); MinWavelength -= MinWavelength*0.02;
+				//double MaxWavelength = EnergyToWavelength(MinE); MaxWavelength += MaxWavelength*0.02;
 				
-				AbsorbCoeffData* AbsorbData = new AbsorbCoeffData( MinWavelength, MaxWavelength, 1, 5000, AtomicData.AbsorbCoeffDataFilename.c_str());
+				AbsorbCoeffDataEnergy* AbsorbData = new AbsorbCoeffDataEnergy( MinE, MaxE, 5000, AtomicData.AbsorbCoeffDataFilename.c_str());
 				AtomicData.AbsorbCoData = AbsorbData;
 				
 				
@@ -242,22 +242,14 @@ public:
         this->Multiplicity = Multiplicity;
     }
     
-    Vector BraggReflectXRay( XRay Ray )
-    {
-        return BraggReflectXRay( Ray.Direction, Ray.Wavelength);
-    }
+
     
     //if the direction (and therefore angle) don't match up with the plane and wavelength then this is meaningless
     Vector BraggReflectXRay( Vector Direction, float Wavelength)
     {
         return Wavelength*H + Direction;
     }
-    
-    float FindBraggReflectionAngle( XRay Ray )
-    {
-        return FindBraggReflectionAngle( Ray.Wavelength );
-    }
-    
+        
     float FindBraggReflectionAngle( float Wavelength )
     {
         float sinTheta = Wavelength * HalfMagH;
@@ -274,10 +266,6 @@ public:
         //don't need to conditionally take modulus as both wavelength and |H|/2 are +ve
     }
     
-    float FindGeometricalReflectionAngle( XRay Ray )
-    {
-        return FindGeometricalReflectionAngle( Ray.Direction );
-    }
     
     float FindGeometricalReflectionAngle( Vector Direction )
     {
@@ -302,13 +290,12 @@ public:
 		
 		double TotalRealPart = 0.0;
 		double TotalComplexPart = 0.0;
-		
+		double Energy = WavelengthToEnergy(Wavelength);
 		for( std::vector< _Atom >::iterator it = UnitCell.begin(); it != UnitCell.end(); ++it)
 		{
 			_AtomData AtomicData = AtomData.find( it->Type )->second;
-			double f_real = AtomicData.FormFacData->GetFormFactorDataPoint(HalfMagH);
-			
-			double AbsorbCoeff = AtomicData.AbsorbCoData->GetAbsorbCoeffDataPoint( Wavelength );
+			double f_real = AtomicData.FormFacData->GetFormFactorDataPoint(HalfMagH);			
+			double AbsorbCoeff = AtomicData.AbsorbCoData->GetAbsorbCoeffDataPointEnergy( Energy );
 			//4pi*Avagadro number*electronradius*hbar*c / 1keV = 42080.32 cm^2
 			double f2ConversionFactor = 42080.32/AtomicData.mass_amu;
 			double f_im = ( double(1E8) * (AbsorbCoeff/AtomicData.density) * (12.39842/Wavelength) )/(f2ConversionFactor);
@@ -318,7 +305,7 @@ public:
 			double RealCoeff = cos(argument);
 			double ComplexCoeff = sin(argument);
 			
-			//may be worth re-adding this if f_real or f_im are particularly large? Usually after squaring the structure factor the precision errors this is meant to correct disappear anyway
+			//may be worth re-adding this if f_real or f_im are particularly large? Usually after squaring the structure factor the precision errors that this is meant to correct disappear anyway
 			/*if( RealCoeff < 10E-7) //precision errors can produce very small numbers instead of zero
 			 {
 			 RealCoeff = 0.0;
@@ -333,7 +320,7 @@ public:
 		}
 		
         //mu is in A^-1
-        double mu = AbsorbCoData->GetAbsorbCoeffDataPoint( Wavelength );
+        double mu = AbsorbCoData->GetAbsorbCoeffDataPointEnergy( Energy );
 		
         /*
 		 Old way of doing it:
@@ -394,7 +381,7 @@ public:
         
         double SinTheta_Lambda = sin(BraggTheta)/Wavelength;
         
-        double TwoM = DebyeWallerPreFactor*SinTheta_Lambda*SinTheta_Lambda;
+		double TwoM = DebyeWallerPreFactor*SinTheta_Lambda*SinTheta_Lambda;
         
         return exp( -1.0*TwoM );
     }
@@ -412,9 +399,7 @@ public:
 		double IntegralPart = Compute1DIntegral(DebyeFunc, 0, x, 0.00001)*(1/x) + 0.25*x;
 		double PreFactor = (IntegralPart*22998.4*Temp)/(mass_amu*DebyeTemp*DebyeTemp);
 		return PreFactor;
-	}
-	
-	
+	}	
 };
 
 double LatticePlane::DebyeWallerPreFactor = 0.0;
@@ -429,7 +414,7 @@ double LatticePlane::MinE = 0.0;
 double LatticePlane::MaxE = 0.0;
 std::vector< LatticePlane::_Atom > LatticePlane::UnitCell;
 std::map< int, LatticePlane::_AtomData > LatticePlane::AtomData;
-AbsorbCoeffData* LatticePlane::AbsorbCoData = NULL;
+AbsorbCoeffDataEnergy* LatticePlane::AbsorbCoData = NULL;
 
 
 

@@ -7,20 +7,30 @@
 using namespace std;
 
 
+#ifndef PI
 #define PI (3.14159265)
+#endif
 
-float Deg2Rad( float Degrees )
+
+
+#ifdef VECTOR_USE_SINGLE_PRECISION
+	typedef float _VectorPrecision;
+#else
+	typedef double _VectorPrecision;
+#endif
+
+_VectorPrecision Deg2Rad( _VectorPrecision Degrees )
 {
-    return Degrees * (PI/180.0f);
+    return Degrees * (PI/180.0);
 }
 
-float Rad2Deg( float Radians )
+_VectorPrecision Rad2Deg( _VectorPrecision Radians )
 {
-    return Radians * (180.0f/PI);
+    return Radians * (180.0/PI);
 }
 
 
-float Rad2Deg2( float Radians )
+_VectorPrecision Rad2Deg2( _VectorPrecision Radians )
 {
     if( Radians <= 0.0f)
     {
@@ -32,7 +42,7 @@ float Rad2Deg2( float Radians )
     }
 }
 
-float Deg2Rad2( float Degrees )
+_VectorPrecision Deg2Rad2( _VectorPrecision Degrees )
 {
     if( Degrees <= 0.0f)
     {
@@ -49,11 +59,11 @@ float Deg2Rad2( float Degrees )
 class Vector
 {
 public:
-    double x,y,z;
+    _VectorPrecision x,y,z;
 
     Vector ();
-    Vector ( double X, double Y, double Z);
-    Vector ( double r, double theta, double phi, bool bSpherical)
+    Vector ( _VectorPrecision X, _VectorPrecision Y, _VectorPrecision Z);
+    Vector ( _VectorPrecision r, _VectorPrecision theta, _VectorPrecision phi, bool bSpherical)
     {
         x = r*sin(theta)*cos(phi);
         y = r*sin(theta)*sin(phi);
@@ -63,45 +73,45 @@ public:
     // slightly more efficient way to create a spherical unit vector.
     //Need the extra input so that there's no compiler error.
     //(float,float,bool) is apparently equivalent to (float,float,float)
-    //might be a GNU thing?
-    Vector ( double theta, double phi, bool bSpherical, bool bUnit)
+    //might be a GCC thing?
+    Vector ( _VectorPrecision theta, _VectorPrecision phi, bool bSpherical, bool bUnit)
     {
         x = sin(theta)*cos(phi);
         y = sin(theta)*sin(phi);
         z = cos(theta);
     }
 
-    float GetTheta()
+    _VectorPrecision GetTheta()
     {
         return acos(z/Magnitude());
     }
 
-    void SetTheta( float theta )
+    void SetTheta( _VectorPrecision theta )
     {
-        float r = Magnitude();
-        float phi = GetPhi();
+        _VectorPrecision r = Magnitude();
+        _VectorPrecision phi = GetPhi();
 
         x = r*sin(theta)*cos(phi);
         y = r*sin(theta)*sin(phi);
         z = r*cos(theta);
     }
 
-    float GetPhi()
+    _VectorPrecision GetPhi()
     {
         return atan2(y,x);
     }
 
-    void SetPhi( float phi)
+    void SetPhi( _VectorPrecision phi)
     {
-        float r = Magnitude();
-        float theta = GetTheta();
+        _VectorPrecision r = Magnitude();
+        _VectorPrecision theta = GetTheta();
 
         x = r*sin(theta)*cos(phi);
         y = r*sin(theta)*sin(phi);
         z = r*cos(theta);
     }
 
-    double Dot( const Vector V )
+    _VectorPrecision Dot( const Vector V )
     {
         return x*V.x + y*V.y + z*V.z;
     }
@@ -111,23 +121,40 @@ public:
         return Vector( y*V.z - z*V.y , z*V.x - x*V.z , x*V.y - y*V.x);
     }
 
-    double Magnitude()
+    _VectorPrecision Magnitude()
     {
         return sqrt(x*x + y*y + z*z);
     }
 
     Vector Normalized()
     {
-        double Mag = this->Magnitude();
+        _VectorPrecision Mag = this->Magnitude();
         if(Mag == 0.0)
         {
             return Vector(0,0,0); //avoid the divide by 0 error
         }
 
-        return this->Scale(double(1.0)/Mag);
+        return this->Divide(Mag);
     }
+	
+	void SelfNormalize()
+	{
+		_VectorPrecision Mag = this->Magnitude();
+        if(Mag == 0.0)
+        {
+            this->x = 0.0;
+			this->y = 0.0;
+			this->z = 0.0;
+        }
+		else
+		{
+			this->x = this->x / Mag;
+			this->y = this->y / Mag;
+			this->z = this->z / Mag;
+		}
+	}
 
-    Vector Scale( const double Scale )
+    Vector Scale( const _VectorPrecision Scale )
     {
         Vector Out;
         Out.x = x*Scale;
@@ -146,13 +173,13 @@ public:
         return this->Subtract(V);
     }
 
-    Vector operator* (double Scale)
+    Vector operator* (_VectorPrecision Scale)
     {
         return this->Scale( Scale );
     }
 
 
-    Vector Divide( double Denominator )
+    Vector Divide( _VectorPrecision Denominator )
     {
         Vector Out;
         Out.x = x/Denominator;
@@ -161,7 +188,7 @@ public:
         return Out;
     }
 
-    Vector operator/ (double Denominator)
+    Vector operator/ (_VectorPrecision Denominator)
     {
         return this->Divide( Denominator );
     }
@@ -199,12 +226,12 @@ public:
 
 };
 
-Vector operator*(double Scale, Vector V)
+Vector operator*(_VectorPrecision Scale, Vector V)
 {
     return V*Scale;
 }
 
-Vector::Vector(double x, double y, double z)
+Vector::Vector(_VectorPrecision x, _VectorPrecision y, _VectorPrecision z)
 {
     this->x = x;
     this->y = y;
@@ -219,20 +246,20 @@ Vector::Vector(void)
 }
 
 //MUST be a unit vector.
-Vector ScatterUnitVector( Vector In, double Theta, double Phi)
+Vector ScatterUnitVector( Vector In, _VectorPrecision Theta, _VectorPrecision Phi)
 {
     Vector Out;
 
-    double CT = cos(Theta);
-    double ST = sin(Theta);
-    double CP = cos(Phi);
-    double SP = sin(Phi);
+    _VectorPrecision CT = cos(Theta);
+    _VectorPrecision ST = sin(Theta);
+    _VectorPrecision CP = cos(Phi);
+    _VectorPrecision SP = sin(Phi);
 
     //http://en.wikipedia.org/wiki/Monte_Carlo_method_for_photon_transport#Step_3:_Absorption_and_scattering
     //And: NUCLEAR SCIENCE AND ENGINEERING: 131, 132–136 ~1999 Direction Cosines and Polarization Vectors
     //for Monte Carlo Photon Scattering
 
-    double zz = sqrt(1.0-In.z*In.z);
+    _VectorPrecision zz = sqrt(1.0-In.z*In.z);
 
     if( fabs(zz) <= 0.001 ) //if |z|~1
     {
@@ -249,12 +276,12 @@ Vector ScatterUnitVector( Vector In, double Theta, double Phi)
     return Out;
 }
 
-Vector RotateX( Vector V, double Angle)
+Vector RotateX( Vector V, _VectorPrecision Angle)
 {
     Vector VOut;
 
-    float CosTheta = cos(Angle);
-    float SinTheta = sin(Angle);
+    _VectorPrecision CosTheta = cos(Angle);
+    _VectorPrecision SinTheta = sin(Angle);
 
     VOut.x = V.x;
     VOut.y = CosTheta*V.y - SinTheta*V.z;
@@ -263,12 +290,12 @@ Vector RotateX( Vector V, double Angle)
     return VOut;
 }
 
-Vector RotateY( Vector V, double Angle)
+Vector RotateY( Vector V, _VectorPrecision Angle)
 {
     Vector VOut;
 
-    float CosTheta = cos(Angle);
-    float SinTheta = sin(Angle);
+    _VectorPrecision CosTheta = cos(Angle);
+    _VectorPrecision SinTheta = sin(Angle);
 
     VOut.x = CosTheta*V.x + SinTheta*V.z;
     VOut.y = V.y;
@@ -277,12 +304,12 @@ Vector RotateY( Vector V, double Angle)
     return VOut;
 }
 
-Vector RotateZ( Vector V, double Angle)
+Vector RotateZ( Vector V, _VectorPrecision Angle)
 {
     Vector VOut;
 
-    double CosTheta = cos(Angle);
-    double SinTheta = sin(Angle);
+    _VectorPrecision CosTheta = cos(Angle);
+    _VectorPrecision SinTheta = sin(Angle);
 
     VOut.x = CosTheta*V.x - SinTheta*V.y;
     VOut.y = SinTheta*V.x + CosTheta*V.y;
@@ -292,12 +319,12 @@ Vector RotateZ( Vector V, double Angle)
 }
 
 
-Vector RotationAxis( Vector V, Vector Axis, double Angle)
+Vector RotationAxis( Vector V, Vector Axis, _VectorPrecision Angle)
 {
     Vector VOut;
 
-    double CosTheta = cos(Angle);
-    double SinTheta = sin(Angle);
+    _VectorPrecision CosTheta = cos(Angle);
+    _VectorPrecision SinTheta = sin(Angle);
 
     VOut.x = (CosTheta + Axis.x*Axis.x*(1.0-CosTheta))*V.x          + (Axis.x*Axis.y*(1.0-CosTheta) - Axis.z*SinTheta)*V.y +  (Axis.x*Axis.z*(1.0-CosTheta) + Axis.y*SinTheta)*V.z;
     VOut.y = (Axis.y*Axis.x*(1.0 - CosTheta) + Axis.z*SinTheta)*V.x + (CosTheta + Axis.y*Axis.y*(1.0 - CosTheta))*V.y      +  (V.y*V.z*(1.0-CosTheta) - Axis.x*SinTheta)*V.z;
@@ -306,11 +333,11 @@ Vector RotationAxis( Vector V, Vector Axis, double Angle)
     return VOut;
 }
 
-bool RayPlaneIntersect(Vector PlaneUnitNormal, double DistToPlane,
-                       Vector RaySource, Vector RayDirection,
-                       double &DistanceFromSource, Vector &Intersection)
+bool RayPlaneIntersect(Vector PlaneUnitNormal, _VectorPrecision DistToPlane, //these define the plane
+                       Vector RaySource, Vector RayDirection, // these define the ray
+                       _VectorPrecision &DistanceFromSource, Vector &Intersection) //outputs
 {
-    float LineDotNorm = RayDirection.Dot(PlaneUnitNormal);
+    _VectorPrecision LineDotNorm = RayDirection.Dot(PlaneUnitNormal);
     if(LineDotNorm == 0.0)
     {
         return false;
@@ -323,7 +350,7 @@ bool RayPlaneIntersect(Vector PlaneUnitNormal, double DistToPlane,
 }
 
 //maps theta between -pi-->pi and phi between -pi/2 and +pi/2
-void GetAlternateThetaPhi(Vector V, double &Theta, double &Phi)
+void GetAlternateThetaPhi(Vector V, _VectorPrecision &Theta, _VectorPrecision &Phi)
 {
     Phi = V.GetPhi();
     Theta = V.GetTheta();
@@ -337,7 +364,7 @@ void GetAlternateThetaPhi(Vector V, double &Theta, double &Phi)
     return;
 }
 
-void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut, double &DistToPlane)
+void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut, _VectorPrecision &DistToPlane)
 {
     PlaneNormalOut = PlaneNormal;
     
@@ -350,7 +377,7 @@ void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut
     {
         //cout << "Input Normal points towards Origin" << endl;
         //need to check like this or 0.0 --> -0.0
-        //-0.0 with the trig functions goes to the other end of the output range.
+        //-0.0 with the trig functions goes to the other end of the output range (0-->2pi) which can cause problems
         if(PlaneNormalOut.x != 0.0)
         {
             PlaneNormalOut.x *= -1.0;
@@ -372,12 +399,12 @@ void CreatePlane( Vector PlaneOrigin, Vector PlaneNormal, Vector &PlaneNormalOut
 //TODO: Come up with a new name for this
 //Function to take a vector from coordinate frame A to B where in A the vector 0,0,1 gets rotated to (theta,phi,1 [spherical coordinates])
 //theta and phi describe the new frame, Vin is the input.
-Vector TransformToNewFrame( const Vector Vin, const double theta, const double phi)
+Vector TransformToNewFrame( const Vector Vin, const _VectorPrecision theta, const _VectorPrecision phi)
 {
-    double CT = cos(theta);
-    double ST = sin(theta);
-    double CP = cos(phi);
-    double SP = sin(phi);
+    _VectorPrecision CT = cos(theta);
+    _VectorPrecision ST = sin(theta);
+    _VectorPrecision CP = cos(phi);
+    _VectorPrecision SP = sin(phi);
     Vector VOut( CP*CT*Vin.x - SP*Vin.y + CP*ST*Vin.z,
                 SP*CT*Vin.x + CP*Vin.y + SP*ST*Vin.z,
                 CT*Vin.z - ST*Vin.x);
