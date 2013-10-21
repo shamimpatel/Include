@@ -133,6 +133,8 @@ public:
 		
 		ShellProbabilities = new DataLoader( MinE, MaxE, int(ShellDataArray.size()), NumDataPoints, ShellProbDataFileName, true );
 		
+		//cout << ShellDataArray.size() << " Shells" << endl;
+		
 		/*for (auto it = ShellDataArray.begin(); it != ShellDataArray.end(); ++it)
 		 {
 		 cout << it->ShellId << "\t" << it->Yield << "\t" << it->NumLines << "\t";
@@ -149,6 +151,11 @@ public:
 	void PreSelectEnergy( double Energy )
 	{
 		PrePickedPoint = ShellProbabilities->GetDataPoint(Energy);
+		/*for( auto it = PrePickedPoint.ColumnValues.begin(); it != PrePickedPoint.ColumnValues.end(); ++it)
+		{
+			cout << (*it) << "\t";
+		}
+		cout << endl;*/
 	}
 	
 	double PickFluorescenceEnergy( double Energy )
